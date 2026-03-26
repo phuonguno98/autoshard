@@ -104,24 +104,22 @@ func TestMySQLRegistry_StartGarbageCollector(t *testing.T) {
 		WithArgs(10).
 		WillReturnResult(sqlmock.NewResult(0, 5))
 
-	_ = reg.StartGarbageCollector(ctx, myID, 50*time.Millisecond, 10*time.Second)
-
-	// Wait for loop
-	time.Sleep(100 * time.Millisecond)
+	// Execute one cycle manually (Synchronous)
+	_ = reg.performGarbageCollection(ctx, myID, 50*time.Millisecond, 10*time.Second)
 
 	// 2. We are NOT the leader
 	mock.ExpectQuery(regexp.QuoteMeta("SELECT member_id FROM test_table")).
 		WithArgs(60).
 		WillReturnRows(sqlmock.NewRows([]string{"member_id"}).AddRow("other-leader"))
 
-	time.Sleep(100 * time.Millisecond)
+	_ = reg.performGarbageCollection(ctx, myID, 50*time.Millisecond, 10*time.Second)
 
 	// 3. Error in query
 	mock.ExpectQuery(regexp.QuoteMeta("SELECT member_id FROM test_table")).
 		WithArgs(60).
 		WillReturnError(fmt.Errorf("db error"))
 
-	time.Sleep(100 * time.Millisecond)
+	_ = reg.performGarbageCollection(ctx, myID, 50*time.Millisecond, 10*time.Second)
 
 	if err := mock.ExpectationsWereMet(); err != nil {
 		t.Errorf("Expectations not met: %v", err)

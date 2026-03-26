@@ -115,46 +115,54 @@ func (r *Registry) StartGarbageCollector(ctx context.Context, myMemberID string,
 		ticker := time.NewTicker(checkInterval)
 		defer ticker.Stop()
 
-		deadSeconds := int(deadThreshold.Seconds())
-
 		for {
 			select {
 			case <-ctx.Done():
 				return
 			case <-ticker.C:
-				// Dynamic Leader Election: Determining the alpha node of this tick
-				// We use a window of checkInterval * 2 to ensure we find active nodes
-				leaderWindow := int(checkInterval.Seconds() * 2)
-				if leaderWindow < 60 {
-					leaderWindow = 60 // Minimum safety window
-				}
-
-				queryLeader := fmt.Sprintf(`
-					SELECT member_id 
-					FROM %s 
-					WHERE last_heartbeat >= NOW() - INTERVAL ? SECOND
-					ORDER BY last_heartbeat DESC, member_id DESC 
-					LIMIT 1
-				`, r.tableName)
-
-				var leaderID string
-				err := r.db.QueryRowContext(ctx, queryLeader, leaderWindow).Scan(&leaderID)
-
-				if err == sql.ErrNoRows || err != nil {
-					continue // Failed to nominate a leader or all nodes are virtually dead
-				}
-
-				if leaderID == myMemberID {
-					// We act as the GC Leader for this turn. Launch Extermination command.
-					queryDelete := fmt.Sprintf(`
-						DELETE FROM %s 
-						WHERE last_heartbeat < NOW() - INTERVAL ? SECOND
-					`, r.tableName)
-
-					_, _ = r.db.ExecContext(ctx, queryDelete, deadSeconds)
-				}
+				_ = r.performGarbageCollection(ctx, myMemberID, checkInterval, deadThreshold)
 			}
 		}
 	}()
+	return nil
+}
+
+// performGarbageCollection executes a single cycle of the leader-based garbage collection.
+func (r *Registry) performGarbageCollection(ctx context.Context, myMemberID string, checkInterval, deadThreshold time.Duration) error {
+	deadSeconds := int(deadThreshold.Seconds())
+
+	// Dynamic Leader Election: Determining the alpha node of this tick
+	// We use a window of checkInterval * 2 to ensure we find active nodes
+	leaderWindow := int(checkInterval.Seconds() * 2)
+	if leaderWindow < 60 {
+		leaderWindow = 60 // Minimum safety window
+	}
+
+	queryLeader := fmt.Sprintf(`
+		SELECT member_id 
+		FROM %s 
+		WHERE last_heartbeat >= NOW() - INTERVAL ? SECOND
+		ORDER BY last_heartbeat DESC, member_id DESC 
+		LIMIT 1
+	`, r.tableName)
+
+	var leaderID string
+	err := r.db.QueryRowContext(ctx, queryLeader, leaderWindow).Scan(&leaderID)
+
+	if err == sql.ErrNoRows || err != nil {
+		return err // Failed to nominate a leader or all nodes are virtually dead
+	}
+
+	if leaderID == myMemberID {
+		// We act as the GC Leader for this turn. Launch Extermination command.
+		queryDelete := fmt.Sprintf(`
+			DELETE FROM %s 
+			WHERE last_heartbeat < NOW() - INTERVAL ? SECOND
+		`, r.tableName)
+
+		_, err = r.db.ExecContext(ctx, queryDelete, deadSeconds)
+		return err
+	}
+
 	return nil
 }

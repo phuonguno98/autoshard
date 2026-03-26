@@ -40,16 +40,28 @@ graph TD
         P1[Partitioner 1]
         P2[Partitioner 2]
         
-        W1 -- "IsMyJob(jobID)" --> P1
-        W2 -- "IsMyJob(jobID)" --> P2
+        W1 -- "Continuously calls: IsMyJob(jobID)" --> P1
+        W2 -- "Continuously calls: IsMyJob(jobID)" --> P2
     end
     
     subgraph "Datastore / Consensus (Adapters)"
-        DB[(Shared Database: MySQL / Redis)]
+        DB[(Database: MySQL / Redis)]
     end
     
-    P1 -- "Heartbeat & Sync" --> DB
-    P2 -- "Heartbeat & Sync" --> DB
+    %% Write flow (Heartbeat)
+    P1 -- "1. Heartbeat(perceived_version) with Jitter" --> DB
+    P2 -- "1. Heartbeat(perceived_version) with Jitter" --> DB
+    
+    %% Read flow (Sync)
+    P1 -- "2. Sync() - Fetch active members" --> DB
+    P2 -- "2. Sync() - Fetch active members" --> DB
+    
+    %% GC flow
+    GC1[GC Goroutine 1] -. "3. Physical Cleanup<br/>(Executed by Leader only)" .-> DB
+    GC2[GC Goroutine 2] -. "(Idle / Waiting)" .-x DB
+
+    P1 --- GC1
+    P2 --- GC2
     
     classDef core fill:#e1f5fe,stroke:#01579b,stroke-width:2px;
     classDef app fill:#f1f8e9,stroke:#33691e,stroke-width:2px;
@@ -165,7 +177,8 @@ partitioner := autoshard.NewPartitioner("node-1", registry,
 
 Để hiểu sâu hơn về cơ sở lý thuyết, chứng minh toán học và máy trạng thái rào chắn hội tụ:
 
-*   [Đặc tả Thiết kế & Kiến trúc](docs/DESIGN_SPECIFICATION.md)
+*   [Nguyên lý hoạt động & Kiến trúc](docs/ARCHITECTURE.md)
+*   [Chi tiết thực thi mã nguồn](docs/IMPLEMENTATION.md)
 *   [Hướng dẫn Phát triển (Go Guidelines)](docs/GO_GUIDELINES.md)
 
 ---
