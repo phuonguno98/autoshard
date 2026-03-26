@@ -1,6 +1,6 @@
 // MIT License
 //
-// Copyright (c) 2026 phuonguno98
+// Copyright (c) 2026 phuonguno
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy...
 
@@ -118,7 +118,7 @@ func (p *Partitioner) Sync(ctx context.Context) error {
 		// If totalMembers == 0 (newly started member), it remains 0 (waiting).
 		// If totalMembers > 0 (existing member), it keeps old state and index intact (serving old jobs).
 	}
-	
+
 	total := p.totalMembers
 	index := p.myIndex
 	isConv := p.isConverged

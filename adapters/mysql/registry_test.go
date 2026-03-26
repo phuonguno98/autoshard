@@ -1,6 +1,6 @@
 // MIT License
 //
-// Copyright (c) 2026 phuonguno98
+// Copyright (c) 2026 phuonguno
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy...
 
@@ -99,7 +99,7 @@ func TestMySQLRegistry_StartGarbageCollector(t *testing.T) {
 	mock.ExpectQuery(regexp.QuoteMeta("SELECT member_id FROM test_table")).
 		WithArgs(60).
 		WillReturnRows(sqlmock.NewRows([]string{"member_id"}).AddRow(myID))
-	
+
 	mock.ExpectExec(regexp.QuoteMeta("DELETE FROM test_table WHERE last_heartbeat")).
 		WithArgs(10).
 		WillReturnResult(sqlmock.NewResult(0, 5))
@@ -165,7 +165,7 @@ func TestMySQLRegistry_Errors(t *testing.T) {
 func TestMySQLRegistry_NewRegistryError(t *testing.T) {
 	db, _, _ := sqlmock.New()
 	defer db.Close()
-	
+
 	if _, err := NewRegistry(db, "drop table students;--"); err == nil {
 		t.Error("Expected error for malicious table name")
 	}

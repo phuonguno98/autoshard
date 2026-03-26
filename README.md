@@ -177,6 +177,7 @@ partitioner := autoshard.NewPartitioner("node-1", registry,
 
 Để hiểu sâu hơn về cơ sở lý thuyết, chứng minh toán học và máy trạng thái rào chắn hội tụ:
 
+*   [Báo cáo Kiểm thử Hỗn loạn (Chaos Engineering Report)](docs/CHAOS_ENGINEERING.md)
 *   [Nguyên lý hoạt động & Kiến trúc](docs/ARCHITECTURE.md)
 *   [Chi tiết thực thi mã nguồn](docs/IMPLEMENTATION.md)
 *   [Hướng dẫn Phát triển (Go Guidelines)](docs/GO_GUIDELINES.md)

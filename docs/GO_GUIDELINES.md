@@ -12,7 +12,7 @@ Mọi file mã nguồn (`*.go`) được tạo ra đều phải bắt buộc có
 ```go
 // MIT License
 //
-// Copyright (c) 2026 phuonguno98
+// Copyright (c) 2026 phuonguno
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy...
 ```

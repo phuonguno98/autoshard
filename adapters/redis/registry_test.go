@@ -1,6 +1,6 @@
 // MIT License
 //
-// Copyright (c) 2026 phuonguno98
+// Copyright (c) 2026 phuonguno
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy...
 
@@ -25,7 +25,7 @@ func TestRedisRegistry(t *testing.T) {
 	client := redis.NewClient(&redis.Options{
 		Addr: s.Addr(),
 	})
-	
+
 	reg, _ := NewRegistry(client, "test:", 1*time.Minute)
 	ctx := context.Background()
 

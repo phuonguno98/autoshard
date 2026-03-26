@@ -1,6 +1,6 @@
 // MIT License
 //
-// Copyright (c) 2026 phuonguno98
+// Copyright (c) 2026 phuonguno
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy...
 
@@ -175,7 +175,7 @@ func TestOptions_Functional(t *testing.T) {
 func TestPartitioner_Shutdown(t *testing.T) {
 	registry, _ := memory.NewRegistry()
 	p, _ := autoshard.NewPartitioner("node-1", registry)
-	
+
 	_ = p.Sync(context.Background())
 	if err := p.Shutdown(context.Background()); err != nil {
 		t.Fatalf("Shutdown failed: %v", err)
@@ -213,7 +213,7 @@ func TestPartitioner_RunSyncLoop(t *testing.T) {
 func TestIsMyJob_AllTypes(t *testing.T) {
 	registry, _ := memory.NewRegistry()
 	p, _ := autoshard.NewPartitioner("node-1", registry)
-	
+
 	// Converge to N=1
 	_ = p.Sync(context.Background())
 	_ = p.Sync(context.Background())
@@ -232,11 +232,11 @@ func TestIsMyJob_AllTypes(t *testing.T) {
 
 func TestNewPartitioner_Errors(t *testing.T) {
 	reg, _ := memory.NewRegistry()
-	
+
 	if _, err := autoshard.NewPartitioner("", reg); err == nil {
 		t.Error("Expected error for empty memberID")
 	}
-	
+
 	if _, err := autoshard.NewPartitioner("node-1", nil); err == nil {
 		t.Error("Expected error for nil registry")
 	}
@@ -245,7 +245,7 @@ func TestNewPartitioner_Errors(t *testing.T) {
 func TestPartitioner_Status(t *testing.T) {
 	reg, _ := memory.NewRegistry()
 	p, _ := autoshard.NewPartitioner("node-1", reg)
-	
+
 	status := p.Status()
 	if status.MemberID != "node-1" {
 		t.Errorf("Expected memberID node-1, got %s", status.MemberID)
@@ -257,20 +257,20 @@ func TestPartitioner_Status(t *testing.T) {
 
 func TestPartitioner_Callbacks(t *testing.T) {
 	reg, _ := memory.NewRegistry()
-	
+
 	syncErrorCalled := false
 	stateChangeCalled := false
-	
+
 	opts := []autoshard.Option{
 		autoshard.WithOnSyncError(func(err error) { syncErrorCalled = true }),
 		autoshard.WithOnStateChange(func(conv bool, total int, idx int) { stateChangeCalled = true }),
 	}
-	
+
 	p, _ := autoshard.NewPartitioner("node-1", reg, opts...)
-	
+
 	// Trigger sync
 	_ = p.Sync(context.Background())
-	
+
 	if !stateChangeCalled {
 		t.Error("OnStateChange was not called during Sync")
 	}
@@ -289,7 +289,7 @@ func TestOptions_Jitter(t *testing.T) {
 		EnableJitter:  true,
 		JitterPercent: 0.2,
 	}
-	
+
 	base := 100 * time.Millisecond
 	for i := 0; i < 100; i++ {
 		val := opts.GetJitteredInterval(base)
@@ -297,13 +297,13 @@ func TestOptions_Jitter(t *testing.T) {
 			t.Errorf("Jittered value out of range: %v", val)
 		}
 	}
-	
+
 	// Edge cases
 	opts.EnableJitter = false
 	if opts.GetJitteredInterval(base) != base {
 		t.Error("Jitter should be disabled")
 	}
-	
+
 	opts.EnableJitter = true
 	opts.JitterPercent = -1
 	if opts.GetJitteredInterval(base) != base {
@@ -316,7 +316,7 @@ func TestIsMyJob_NegativeInt(t *testing.T) {
 	p, _ := autoshard.NewPartitioner("node-1", reg)
 	_ = p.Sync(context.Background())
 	_ = p.Sync(context.Background()) // Converge to N=1
-	
+
 	if !autoshard.IsMyJob(p, int(-1)) {
 		t.Error("IsMyJob failed for negative int")
 	}
@@ -327,4 +327,3 @@ func TestIsMyJob_NegativeInt(t *testing.T) {
 		t.Error("IsMyJob failed for negative int64")
 	}
 }
-

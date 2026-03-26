@@ -1,6 +1,6 @@
 // MIT License
 //
-// Copyright (c) 2026 phuonguno98
+// Copyright (c) 2026 phuonguno
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy...
 
@@ -17,7 +17,7 @@ func TestMemoryRegistry(t *testing.T) {
 	reg, _ := NewRegistry()
 
 	memberID := "node-1"
-	
+
 	// Test Heartbeat
 	err := reg.Heartbeat(ctx, memberID, 1)
 	if err != nil {
@@ -51,7 +51,7 @@ func TestMemoryRegistry_GarbageCollector(t *testing.T) {
 	defer cancel()
 
 	reg, _ := NewRegistry()
-	
+
 	// Record an old heartbeat (manual insertion if possible, or just wait)
 	reg.mu.Lock()
 	reg.members["old-node"] = memberRecord{
@@ -67,7 +67,7 @@ func TestMemoryRegistry_GarbageCollector(t *testing.T) {
 	time.Sleep(300 * time.Millisecond)
 
 	_, _ = reg.GetActiveMembers(ctx, 10*time.Second)
-	
+
 	// The member should be removed by GC
 	reg.mu.RLock()
 	_, exists := reg.members["old-node"]
