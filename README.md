@@ -83,6 +83,15 @@ go get github.com/phuonguno98/autoshard/adapters/mysql # Hoặc /adapters/redis
 
 ---
 
+## 🗄️ Cấu hình Cơ sở dữ liệu (Database Setup)
+
+Nếu bạn sử dụng **MySQL Adapter**, bạn cần tạo bảng Registry trước khi khởi chạy ứng dụng.
+
+*   **SQL Script:** Xem tại [scripts/sql/mysql_schema.sql](scripts/sql/mysql_schema.sql)
+*   **Hướng dẫn chi tiết:** Xem tại [Hướng dẫn cài đặt Cơ sở dữ liệu](docs/DATABASE_SETUP.md)
+
+---
+
 ## 🚀 Hướng dẫn nhanh
 
 Tích hợp Autoshard vào dịch vụ Go của bạn chỉ với chưa đầy 20 dòng code:
@@ -179,6 +188,7 @@ partitioner := autoshard.NewPartitioner("node-1", registry,
 
 *   [Báo cáo Kiểm thử Hỗn loạn (Chaos Engineering Report)](docs/CHAOS_ENGINEERING.md)
 *   [Nguyên lý hoạt động & Kiến trúc](docs/ARCHITECTURE.md)
+*   [Hướng dẫn Cài đặt CSDL (MySQL)](docs/DATABASE_SETUP.md)
 *   [Chi tiết thực thi mã nguồn](docs/IMPLEMENTATION.md)
 *   [Hướng dẫn Phát triển (Go Guidelines)](docs/GO_GUIDELINES.md)
 
