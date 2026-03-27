@@ -137,6 +137,7 @@ func (o *Options) GetJitteredInterval(base time.Duration) time.Duration {
 	}
 
 	// Time will vary positively: base + random(0 to maxJitter)
+	// #nosec G404 - Weak random is sufficient for network jitter and performance thundering herd protection
 	jitter := time.Duration(rand.Float64() * maxJitter)
 	return base + jitter
 }

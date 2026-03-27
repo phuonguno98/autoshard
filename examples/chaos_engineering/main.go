@@ -196,6 +196,7 @@ func main() {
 	fmt.Printf("%s 🚀 AUTOSHARD TIME-SYNC TEST SUITE (TIER-1 VALIDATION)\n", ts())
 	fmt.Printf("%s =======================================================\n", ts())
 
+	// #nosec G404 - Simulation RNG for chaos engineering testing (non-cryptographic)
 	rng := rand.New(rand.NewSource(time.Now().UnixNano()))
 	var jobs []int
 	for i := 0; i < 100; i++ {
@@ -232,8 +233,8 @@ func main() {
 	runConvergencePhases(nodes2, jobs, "Initializing 5 Nodes")
 
 	fmt.Printf("\n%s    🔽 ACTION: Shutting down node-04 and node-05 (Calling Shutdown()...)\n", ts())
-	nodes2[3].Shutdown(context.Background())
-	nodes2[4].Shutdown(context.Background())
+	_ = nodes2[3].Shutdown(context.Background())
+	_ = nodes2[4].Shutdown(context.Background())
 	runConvergencePhases(nodes2[:3], jobs, "Remaining 3 Nodes rebalancing")
 
 	nodes2 = nil

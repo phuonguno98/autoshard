@@ -46,6 +46,7 @@ func NewRegistry(db *sql.DB, tableName string) (*Registry, error) {
 // Heartbeat employs UPSERT logic (INSERT ... ON DUPLICATE KEY UPDATE)
 // to accurately record the member's pulse and current perceived cluster scale.
 func (r *Registry) Heartbeat(ctx context.Context, memberID string, perceivedVersion int) error {
+	// #nosec G201 - Table name is validated in NewRegistry via validTableName regex
 	query := fmt.Sprintf(`
 		INSERT INTO %s (member_id, perceived_version, last_heartbeat) 
 		VALUES (?, ?, NOW()) 
@@ -70,6 +71,7 @@ func (r *Registry) GetActiveMembers(ctx context.Context, activeWindow time.Durat
 		seconds = 30 // Safe fallback
 	}
 
+	// #nosec G201 - Table name is validated via validTableName regex
 	query := fmt.Sprintf(`
 		SELECT member_id, perceived_version 
 		FROM %s 
@@ -100,6 +102,7 @@ func (r *Registry) GetActiveMembers(ctx context.Context, activeWindow time.Durat
 
 // Deregister natively wipes the member row upon Graceful Shutdown requests.
 func (r *Registry) Deregister(ctx context.Context, memberID string) error {
+	// #nosec G201 - Table name is validated via validTableName regex
 	query := fmt.Sprintf(`DELETE FROM %s WHERE member_id = ?`, r.tableName)
 	if _, err := r.db.ExecContext(ctx, query, memberID); err != nil {
 		return fmt.Errorf("execute deregister query: %w", err)
@@ -138,6 +141,7 @@ func (r *Registry) performGarbageCollection(ctx context.Context, myMemberID stri
 		leaderWindow = 60 // Minimum safety window
 	}
 
+	// #nosec G201 - Table name is validated via validTableName regex
 	queryLeader := fmt.Sprintf(`
 		SELECT member_id 
 		FROM %s 
@@ -155,6 +159,7 @@ func (r *Registry) performGarbageCollection(ctx context.Context, myMemberID stri
 
 	if leaderID == myMemberID {
 		// We act as the GC Leader for this turn. Launch Extermination command.
+		// #nosec G201 - Table name is validated via validTableName regex
 		queryDelete := fmt.Sprintf(`
 			DELETE FROM %s 
 			WHERE last_heartbeat < NOW() - INTERVAL ? SECOND

@@ -152,20 +152,26 @@ func IsMyJob[T JobID](p *Partitioner, jobID T) bool {
 	case string:
 		hashVal = hasher([]byte(v))
 	case int:
-		hashVal = uint64(v)
+		hashVal = uint64(v) // #nosec G115 - Bit pattern intentional for hashing
 	case int32:
-		hashVal = uint64(v)
+		hashVal = uint64(v) // #nosec G115
 	case int64:
-		hashVal = uint64(v)
+		hashVal = uint64(v) // #nosec G115
 	case uint:
-		hashVal = uint64(v)
+		hashVal = uint64(v) // #nosec G115
 	case uint32:
-		hashVal = uint64(v)
+		hashVal = uint64(v) // #nosec G115
 	case uint64:
 		hashVal = v
 	}
 
-	return int(hashVal%uint64(total)) == index
+	if total <= 0 || index < 0 {
+		return false
+	}
+
+	result := hashVal % uint64(total)
+	// #nosec G115 - index is guaranteed non-negative here
+	return result == uint64(index)
 }
 
 // Shutdown gracefully stops the partitioner by deregistering itself from the registry.
